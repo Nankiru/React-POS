@@ -3,6 +3,18 @@ import Admin from "../src/assets/image/nan.jpg";
 import POSLogo from "../src/assets/icons/pos-logo.png";
 import axios from "axios";
 
+// icon categories
+import AllMenuIcon from '../src/assets/category/all-menu.png';
+import AppetizerIcon from '../src/assets/category/appetizer.png';
+import SeafoodIcon from '../src/assets/category/sea-food.png';
+import ChickenIcon from '../src/assets/category/chicken.png';
+import SteakIcon from '../src/assets/category/steak.png';
+import SaladIcon from '../src/assets/category/salad.png';
+import SpicyFoodIcon from '../src/assets/category/spicy-food.png';
+import DessertIcon from '../src/assets/category/dessert.png';
+import BeveragesIcon from '../src/assets/category/beverages.png';
+import CocktailIcon from '../src/assets/category/cocktail.png';
+
 function App() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
@@ -79,7 +91,7 @@ function App() {
       count: 160,
       icon: (
         <img
-          src="/src/assets/category/all-menu.png"
+          src={AllMenuIcon}
           alt="All Menu"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -91,7 +103,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/appetizer.png"
+          src={AppetizerIcon}
           alt="Appetizer"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -103,7 +115,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/sea-food.png"
+          src={SeafoodIcon}
           alt="Seafood"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -115,7 +127,7 @@ function App() {
       count: 25,
       icon: (
         <img
-          src="/src/assets/category/chicken.png"
+          src={ChickenIcon}
           alt="Chicken"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -127,7 +139,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/steak.png"
+          src={SteakIcon}
           alt="Steak"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -139,7 +151,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/salad.png"
+          src={SaladIcon}
           alt="Salad"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -151,7 +163,7 @@ function App() {
       count: 30,
       icon: (
         <img
-          src="/src/assets/category/spicy-food.png"
+          src={SpicyFoodIcon}
           alt="Spicy Food"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -163,7 +175,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/dessert.png"
+          src={DessertIcon}
           alt="Dessert"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -175,7 +187,7 @@ function App() {
       count: 20,
       icon: (
         <img
-          src="/src/assets/category/beverages.png"
+          src={BeveragesIcon}
           alt="Beverages"
           className="w-7 h-7 mr-2 object-contain"
         />
@@ -187,7 +199,7 @@ function App() {
       count: 15,
       icon: (
         <img
-          src="/src/assets/category/cocktail.png"
+          src={CocktailIcon}
           alt="Cocktail"
           className="w-7 h-7 mr-2 object-contain"
         />
