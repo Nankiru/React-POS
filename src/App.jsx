@@ -3,24 +3,72 @@ import Admin from "../src/assets/image/nan.jpg";
 import POSLogo from "../src/assets/icons/pos-logo.png";
 import axios from "axios";
 
+import "./assets/css/font.css";
+
 // icon categories
-import AllMenuIcon from '../src/assets/category/all-menu.png';
-import AppetizerIcon from '../src/assets/category/appetizer.png';
-import SeafoodIcon from '../src/assets/category/sea-food.png';
-import ChickenIcon from '../src/assets/category/chicken.png';
-import SteakIcon from '../src/assets/category/steak.png';
-import SaladIcon from '../src/assets/category/salad.png';
-import SpicyFoodIcon from '../src/assets/category/spicy-food.png';
-import DessertIcon from '../src/assets/category/dessert.png';
-import BeveragesIcon from '../src/assets/category/beverages.png';
-import CocktailIcon from '../src/assets/category/cocktail.png';
+import AllMenuIcon from "../src/assets/category/all-menu.png";
+import AppetizerIcon from "../src/assets/category/appetizer.png";
+import SeafoodIcon from "../src/assets/category/sea-food.png";
+import ChickenIcon from "../src/assets/category/chicken.png";
+import SteakIcon from "../src/assets/category/steak.png";
+import SaladIcon from "../src/assets/category/salad.png";
+import SpicyFoodIcon from "../src/assets/category/spicy-food.png";
+import DessertIcon from "../src/assets/category/dessert.png";
+import BeveragesIcon from "../src/assets/category/beverages.png";
+import CocktailIcon from "../src/assets/category/cocktail.png";
 
 function App() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Menu");
+
   const [quantities, setQuantities] = useState({});
+  // Order items: array of {product, qty}
+  const [orderItems, setOrderItems] = useState([]);
+  // Add or update product in order
+  const handleSelectProduct = (pro) => {
+    setOrderItems((items) => {
+      const idx = items.findIndex((item) => item.product.id === pro.id);
+      if (idx !== -1) {
+        // Already in order, increment qty
+        const updated = [...items];
+        updated[idx] = { ...updated[idx], qty: updated[idx].qty + 1 };
+        return updated;
+      } else {
+        // Add new product
+        return [...items, { product: pro, qty: 1 }];
+      }
+    });
+  };
+  // Quantity controls for order items
+  const handleOrderQtyChange = (id, value) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.product.id === id ? { ...item, qty: Math.max(1, value) } : item
+      )
+    );
+  };
+  const handleOrderIncrement = (id) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.product.id === id ? { ...item, qty: item.qty + 1 } : item
+      )
+    );
+  };
+  const handleOrderDecrement = (id) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.product.id === id
+          ? { ...item, qty: Math.max(1, item.qty - 1) }
+          : item
+      )
+    );
+  };
+  // Remove item from order
+  const handleRemoveOrderItem = (id) => {
+    setOrderItems((items) => items.filter((item) => item.product.id !== id));
+  };
 
   const base_URL = "http://127.0.0.1:8000/api/product";
 
@@ -171,7 +219,7 @@ function App() {
     },
     {
       name: "Dessert",
-      category_id: 2,
+      category_id: 1,
       count: 20,
       icon: (
         <img
@@ -210,10 +258,25 @@ function App() {
   // Filter products by search and category (dummy logic)
   const filteredProducts = products.filter((pro) => {
     // If Dessert is selected, match by category name or category_id = 2
+    if (category === "Salad") {
+      return (
+        ((pro.category && pro.category === "Salad") || pro.category_id === 1) &&
+        (search === "" ||
+          (pro.name && pro.name.toLowerCase().includes(search.toLowerCase())))
+      );
+    }
     if (category === "Dessert") {
       return (
         ((pro.category && pro.category === "Dessert") ||
-          pro.category_id === 2) &&
+          pro.category_id === 1) &&
+        (search === "" ||
+          (pro.name && pro.name.toLowerCase().includes(search.toLowerCase())))
+      );
+    }
+    if (category === "Seafood") {
+      return (
+        ((pro.category && pro.category === "Seafood") ||
+          pro.category_id === 3) &&
         (search === "" ||
           (pro.name && pro.name.toLowerCase().includes(search.toLowerCase())))
       );
@@ -254,11 +317,7 @@ function App() {
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10 w-full md:w-auto">
           <div className="flex items-center gap-2 md:gap-3">
             <div className=" p-2 flex items-center justify-center">
-              <img
-                src={POSLogo}
-                alt="Logo POS"
-                className="h-16 w-16"
-              />
+              <img src={POSLogo} alt="Logo POS" className="h-16 w-16" />
             </div>
             <div>
               <div className="font-bold text-base sm:text-lg md:text-xl lg:text-2xl text-purple-700 leading-tight">
@@ -385,7 +444,7 @@ function App() {
       </div>
 
       {/* Search and Categories */}
-      <div className="bg-white rounded-xl shadow-md px-8 py-5 mb-8 flex flex-col gap-6">
+      <div className="bg-white rounded-xl shadow-md px-2 md:px-8 py-5 mb-8 flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between w-full mb-4 gap-3 sm:gap-4 md:gap-6">
           <div className="relative w-full sm:max-w-lg">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400">
@@ -412,6 +471,7 @@ function App() {
             New Order
           </button>
         </div>
+        <h1 className="text-xl font-kh-number">Categories</h1>
         <div className="flex gap-4 overflow-x-auto w-full pb-2">
           {categories.map((cat) => (
             <button
@@ -456,181 +516,221 @@ function App() {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((pro, i) => (
-            <div
-              key={i}
-              className="bg-gray-300 hover:shadow-md hover:transition-all hover:duration-300 rounded-xl relative"
-            >
-              {/* image */}
-              <div className="p-2">
-                <div className="w-full h-[160px] flex items-center justify-center mb-2 rounded-lg bg-white ">
-                  <img
-                    src={
-                      pro.image
-                        ? `http://localhost:8000/uploads/products/${pro.image}`
-                        : "https://toppng.com/uploads/preview/clipart-free-seaweed-clipart-draw-food-placeholder-11562968708qhzooxrjly.png"
-                    }
-                    alt={pro.name}
-                    className="w-28 h-28 object-cover rounded-full shadow"
-                  />
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left: Menu Grid */}
+        <div className="w-full lg:w-2/3">
+          <h1 className="text-xl font-kh-number mb-3">Select Menu</h1>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((pro, i) => (
+                <div
+                  key={i}
+                  className="bg-gray-300 hover:shadow-md hover:transition-all hover:duration-300 rounded-xl relative cursor-pointer"
+                  onClick={() => handleSelectProduct(pro)}
+                >
+                  {/* image */}
+                  <div className="p-2">
+                    <div className="w-full min-h-[120px] lg:min-h-[100px] bg-white flex items-center justify-center mb-2 rounded-lg ">
+                      <img
+                        src={
+                          pro.image
+                            ? `http://localhost:8000/uploads/products/${pro.image}`
+                            : "https://toppng.com/uploads/preview/clipart-free-seaweed-clipart-draw-food-placeholder-11562968708qhzooxrjly.png"
+                        }
+                        alt={pro.name}
+                        className="w-22"
+                      />
+                    </div>
+                  </div>
+                  {/* Detail */}
+                  <div className="pl-3">
+                    <h2 className="font-bold text-[16px] text-gray-800 text-left mb-1">
+                      {pro.name}
+                    </h2>
+                    {/* <div className="mb-2">
+                      {pro.status == "available" ? (
+                        <span className="bg-green-700 relative text-white px-3 pb-[2px] rounded-2xl text-xs font-semibold inline-flex items-center gap-1 w-auto min-w-0">
+                          <span className="absolute inset-0 bg-green-200 rounded-2xl transform scale-x-0 transition-transform duration-300 ease-in-out"></span>
+                          <span className="inline-block w-2 h-2 rounded-full bg-green-300 border border-green-700 mr-1"></span>
+                          Available
+                        </span>
+                      ) : (
+                        <span className="bg-red-700 relative text-white px-3 pb-[2px] rounded-2xl text-xs font-semibold inline-flex items-center gap-1 w-auto min-w-0">
+                          <span className="absolute inset-0 bg-red-200 rounded-2xl transform scale-x-0 transition-transform duration-300 ease-in-out"></span>
+                          <span className="inline-block w-2 h-2 rounded-full bg-red-300 border border-red-700 mr-1"></span>
+                          Available
+                        </span>
+                      )}
+                    </div> */}
+                    <div className="font-bold text-blue-600 text-lg mb-2 flex items-center gap-2">
+                      <span className="text-base md:text-lg lg:text-xl font-kh-number">
+                        <sup>$</sup>
+                        {pro.price
+                          ? Number(pro.price) % 1 === 0
+                            ? Number(pro.price).toLocaleString()
+                            : Number(pro.price).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                          : "-"}
+                      </span>
+                      <span className="mx-2 text-gray-400 font-normal">|</span>
+                      <span className="text-base md:text-lg lg:text-xl font-kh-number">
+                        <sup>៛</sup>
+                        {pro.price
+                          ? (pro.price * 4100).toLocaleString("km-KH", {
+                              maximumFractionDigits: 0,
+                            })
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500">
+                <div className="relative h-[calc(550px-85px)] flex justify-center items-center flex-col">
+                  {/* You can add your empty state SVG and message here */}
                 </div>
               </div>
-              {/* Detail */}
-              <div className="pl-3">
-                <h2 className="font-bold text-xl text-gray-800 text-left mb-1">
-                  {pro.name}
-                </h2>
-                <div className="mb-2">
-                  {pro.status == "available" ? (
-                    <span className="bg-green-700 relative text-white px-3 pb-[2px] rounded-2xl text-xs font-semibold inline-flex items-center gap-1 w-auto min-w-0">
-                      <span className="absolute inset-0 bg-green-200 rounded-2xl transform scale-x-0 transition-transform duration-300 ease-in-out"></span>
-                      <span className="inline-block w-2 h-2 rounded-full bg-green-300 border border-green-700 mr-1"></span>
-                      Available
-                    </span>
-                  ) : (
-                    <span className="bg-red-700 relative text-white px-3 pb-[2px] rounded-2xl text-xs font-semibold inline-flex items-center gap-1 w-auto min-w-0">
-                      <span className="absolute inset-0 bg-red-200 rounded-2xl transform scale-x-0 transition-transform duration-300 ease-in-out"></span>
-                      <span className="inline-block w-2 h-2 rounded-full bg-red-300 border border-red-700 mr-1"></span>
-                      Available
-                    </span>
-                  )}
-                </div>
-                {/* <p className="text-gray-500 text-sm text-center mb-2 line-clamp-2">
-                {pro.description}
-              </p> */}
-                <div className="font-bold text-green-700 text-lg mb-2 flex items-center gap-2">
-                  <span className="text-base md:text-lg lg:text-xl">
-                    $
-                    {pro.price
-                      ? Number(pro.price) % 1 === 0
-                        ? Number(pro.price).toLocaleString()
-                        : Number(pro.price).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                      : "-"}
-                  </span>
-                  <span className="mx-2 text-gray-400 font-normal">|</span>
-                  <span className="text-base md:text-lg lg:text-xl">
-                    ៛
-                    {pro.price
-                      ? (pro.price * 4100).toLocaleString("km-KH", {
-                          maximumFractionDigits: 0,
-                        })
-                      : "-"}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 mt-auto p-2">
-                <div className="flex items-center justify-between mb-2 gap-3 bg-purple-50 rounded-full shadow px-4 py-2 mt-auto w-full">
-                  <button
-                    onClick={() => handleDecrement(pro.id)}
-                    className="w-10 cursor-pointer h-10 pb-[3px] flex items-center justify-center bg-purple-200 text-purple-700 rounded-full text-2xl font-bold transition-all duration-150 hover:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    min="0"
-                    value={quantities[pro.id] || 0}
-                    onChange={(e) =>
-                      handleQuantityChange(pro.id, Number(e.target.value))
-                    }
-                    className="w-16 h-10 text-center border-2 border-purple-300 rounded-full text-xl font-bold bg-white shadow focus:outline-purple-400 mx-2"
-                  />
-                  <button
-                    onClick={() => handleIncrement(pro.id)}
-                    className="w-10  cursor-pointer pb-[3px] h-10 flex items-center justify-center bg-purple-500 text-white rounded-full text-2xl font-bold transition-all duration-150 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center text-gray-500">
-            <div class="relative h-[calc(550px-85px)] flex justify-center items-center flex-col">
-              <svg
-                width="314"
-                height="171"
-                viewBox="0 0 314 171"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M131.408 134.14L131.407 134.139C124.251 129.827 118.724 123.793 114.83 116.051L114.829 116.049C110.981 108.307 109.065 99.3201 109.065 89.1025C109.065 78.885 110.981 69.8983 114.829 62.156L114.83 62.1539C118.724 54.4117 124.251 48.3783 131.407 44.0663L131.408 44.0655C138.616 39.75 147.163 37.6025 157.029 37.6025C166.894 37.6025 175.419 39.7498 182.582 44.0659C189.784 48.3778 195.311 54.4115 199.16 62.1549C203.054 69.8975 204.993 78.8846 204.993 89.1025C204.993 99.3208 203.054 108.308 199.16 116.051C199.16 116.051 199.159 116.051 199.159 116.051L198.713 115.827C194.905 123.488 189.442 129.449 182.325 133.711L131.408 134.14ZM131.408 134.14C138.616 138.455 147.163 140.603 157.029 140.603C166.894 140.603 175.419 138.455 182.582 134.139L131.408 134.14ZM43.4542 138.063V138.563H43.9542H62.7222H63.2222V138.063V123.331H71.4262H71.9262V122.831V105.559V105.059H71.4262H63.2222V81.0785V80.5785H62.7222H43.9542H43.4542V81.0785V105.059H23.3911L53.9264 40.3559L54.2631 39.6425H53.4742H32.2582H31.9413L31.8061 39.9291L0.934056 105.345L0.88623 105.446V105.559V122.831V123.331H1.38623H43.4542V138.063ZM181.318 106.729L181.317 106.732C179.31 111.726 176.288 115.563 172.254 118.267C168.232 120.963 163.171 122.284 157.036 122.195C150.898 122.105 145.83 120.695 141.803 117.995C137.767 115.29 134.722 111.495 132.671 106.591C130.661 101.678 129.649 95.853 129.649 89.1025C129.649 82.3519 130.661 76.4793 132.672 71.4739C134.724 66.4795 137.769 62.6418 141.803 59.9379C145.825 57.2419 150.887 55.9209 157.021 56.0105C163.16 56.1001 168.227 57.5104 172.254 60.2099C176.29 62.9151 179.312 66.709 181.318 71.6119L181.319 71.6154C183.374 76.5274 184.409 82.3523 184.409 89.1025C184.409 95.8524 183.374 101.724 181.318 106.729ZM284.642 138.063V138.563H285.142H303.91H304.41V138.063V123.331H312.614H313.114V122.831V105.559V105.059H312.614H304.41V81.0785V80.5785H303.91H285.142H284.642V81.0785V105.059H264.579L295.114 40.3559L295.451 39.6425H294.662H273.446H273.129L272.994 39.9291L242.122 105.345L242.074 105.446V105.559V122.831V123.331H242.574H284.642V138.063Z"
-                  fill="#EEF2FF"
-                  stroke="#4F46E5"
-                />
-                <path
-                  d="M176.88 0.632498L176.88 0.632384L176.869 0.630954C176.264 0.549581 175.654 0.5 175.04 0.5H109.399C102.772 0.5 97.4004 5.84455 97.4004 12.4473V142.715C97.4004 149.318 102.772 154.662 109.399 154.662H204.009C210.652 154.662 216.007 149.317 216.007 142.715V38.9309C216.007 38.0244 215.908 37.1334 215.709 36.2586L215.709 36.2584C215.178 33.9309 213.935 31.7686 212.127 30.1333C212.127 30.1331 212.126 30.1329 212.126 30.1327L183.129 3.65203C183.129 3.6519 183.128 3.65177 183.128 3.65164C181.372 2.03526 179.201 0.995552 176.88 0.632498Z"
-                  fill="white"
-                  stroke="#E5E7EB"
-                />
-                <ellipse
-                  cx="160.123"
-                  cy="81"
-                  rx="28.0342"
-                  ry="28.0342"
-                  fill="#EEF2FF"
-                />
-                <path
-                  d="M179.3 61.3061L179.3 61.3058C168.559 50.5808 151.17 50.5804 140.444 61.3061C129.703 72.0316 129.703 89.4361 140.444 100.162C151.17 110.903 168.559 110.903 179.3 100.162C190.026 89.4364 190.026 72.0317 179.3 61.3061ZM185.924 54.6832C200.31 69.0695 200.31 92.3985 185.924 106.785C171.522 121.171 148.208 121.171 133.806 106.785C119.419 92.3987 119.419 69.0693 133.806 54.683C148.208 40.2965 171.522 40.2966 185.924 54.6832Z"
-                  stroke="#E5E7EB"
-                />
-                <path
-                  d="M190.843 119.267L182.077 110.492C184.949 108.267 187.537 105.651 189.625 102.955L198.39 111.729L190.843 119.267Z"
-                  stroke="#E5E7EB"
-                />
-                <path
-                  d="M219.183 125.781L219.183 125.78L203.374 109.988C203.374 109.987 203.374 109.987 203.373 109.986C202.057 108.653 199.91 108.657 198.582 109.985L198.931 110.335L198.582 109.985L189.108 119.459C187.792 120.775 187.796 122.918 189.105 124.247L189.108 124.249L204.919 140.06C208.85 143.992 215.252 143.992 219.183 140.06C223.13 136.113 223.13 129.728 219.183 125.781Z"
-                  fill="#A5B4FC"
-                  stroke="#818CF8"
-                />
-                <path
-                  d="M163.246 87.2285C162.6 87.2285 162.064 86.6926 162.064 86.0305C162.064 83.3821 158.06 83.3821 158.06 86.0305C158.06 86.6926 157.524 87.2285 156.862 87.2285C156.215 87.2285 155.679 86.6926 155.679 86.0305C155.679 80.2294 164.444 80.2451 164.444 86.0305C164.444 86.6926 163.908 87.2285 163.246 87.2285Z"
-                  fill="#4F46E5"
-                />
-                <path
-                  d="M173.414 77.0926H168.464C167.802 77.0926 167.266 76.5567 167.266 75.8946C167.266 75.2483 167.802 74.7123 168.464 74.7123H173.414C174.076 74.7123 174.612 75.2483 174.612 75.8946C174.612 76.5567 174.076 77.0926 173.414 77.0926Z"
-                  fill="#4F46E5"
-                />
-                <path
-                  d="M151.66 77.0925H146.71C146.048 77.0925 145.512 76.5565 145.512 75.8945C145.512 75.2481 146.048 74.7122 146.71 74.7122H151.66C152.306 74.7122 152.842 75.2481 152.842 75.8945C152.842 76.5565 152.306 77.0925 151.66 77.0925Z"
-                  fill="#4F46E5"
-                />
-                <path
-                  d="M118.413 22.8803C118.413 22.1251 119.025 21.5128 119.781 21.5128H158.071C158.827 21.5128 159.439 22.1251 159.439 22.8803C159.439 23.6356 158.827 24.2479 158.071 24.2479H119.781C119.025 24.2479 118.413 23.6356 118.413 22.8803Z"
-                  fill="#4F46E5"
-                />
-                <path
-                  d="M118.413 136.385C118.413 134.874 119.638 133.65 121.148 133.65H170.379C171.89 133.65 173.114 134.874 173.114 136.385C173.114 137.895 171.89 139.12 170.379 139.12H121.148C119.638 139.12 118.413 137.895 118.413 136.385Z"
-                  fill="#A5B4FC"
-                />
-                <path
-                  d="M118.413 31.0854C118.413 30.3302 119.025 29.7179 119.781 29.7179H130.721C131.476 29.7179 132.088 30.3302 132.088 31.0854C132.088 31.8407 131.476 32.4529 130.721 32.4529H119.781C119.025 32.4529 118.413 31.8407 118.413 31.0854Z"
-                  fill="#4F46E5"
-                />
-                <circle cx="136.191" cy="31.0854" r="1.36752" fill="#4F46E5" />
-                <circle cx="141.661" cy="31.0854" r="1.36752" fill="#4F46E5" />
-                <circle cx="147.131" cy="31.0854" r="1.36752" fill="#4F46E5" />
-              </svg>
-              <div class="block text-center mt-5">
-                <h5 class="md:text-xl text-lg leading-8 text-gray-900 font-medium mb-1.5">
-                  <span class="text-indigo-600 font-semibold ">Oops!</span> It
-                  seems like no product found!
-                </h5>
-                <p class="text-sm text-gray-500">
-                  We're working to bring it back.
-                </p>
-              </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
+        {/* Right: Order Details */}
+        <div className="w-full lg:w-1/3 bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-bold mb-4 text-purple-700">
+            Order Details
+          </h2>
+          {orderItems.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {orderItems.map((item) => (
+                <div
+                  key={item.product.id}
+                  className="bg-purple-50 rounded-xl shadow p-2 sm:p-3 md:p-4 lg:p-5 flex flex-col gap-2"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 md:gap-4">
+                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                      <img
+                        src={
+                          item.product.image
+                            ? `http://localhost:8000/uploads/products/${item.product.image}`
+                            : "https://toppng.com/uploads/preview/clipart-free-seaweed-clipart-draw-food-placeholder-11562968708qhzooxrjly.png"
+                        }
+                        alt={item.product.name}
+                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg object-cover border border-purple-200"
+                      />
+                      <div>
+                        <div className="font-bold text-sm sm:text-base md:text-lg text-purple-700">
+                          {item.product.name}
+                        </div>
+                        <div className="text-xs sm:text-sm md:text-base text-gray-400 flex items-center gap-1 sm:gap-2 mt-1">
+                          Qty:
+                          <button
+                            className="w-7 h-7 pb-[3px] sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center bg-purple-200 text-purple-700 rounded-full text-base md:text-lg font-bold transition-all duration-150 hover:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            onClick={() => handleOrderDecrement(item.product.id)}
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.qty}
+                            onChange={(e) => handleOrderQtyChange(item.product.id, Number(e.target.value))}
+                            className="w-10 sm:w-12 md:w-14  pb-[3px] sm:h-8 md:h-9 text-center border-2 border-purple-300 rounded-full text-base md:text-lg font-bold bg-white shadow focus:outline-purple-400 mx-1 sm:mx-2"
+                          />
+                          <button
+                            className="w-7 h-7 pb-[3px] sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center bg-purple-500 text-white rounded-full text-base md:text-lg font-bold transition-all duration-150 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            onClick={() => handleOrderIncrement(item.product.id)}
+                          >
+                            +
+                          </button>
+                          <button
+                            className="ml-2 text-xs sm:text-sm md:text-base text-red-500 hover:underline cursor-pointer"
+                            onClick={() => handleRemoveOrderItem(item.product.id)}
+                          >Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="block sm:flex sm:items-center  mt-2 sm:mt-0">
+                      <div className="font-bold text-blue-600 text-sm sm:text-base md:text-lg">
+                        ${" "}
+                        {item.product.price
+                          ? Number(item.product.price) % 1 === 0
+                            ? Number(item.product.price).toLocaleString()
+                            : Number(item.product.price).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                          : "-"}
+                      </div>
+                     <span className="mx-2 text-gray-400 font-normal">|</span>
+                      <div className="text-xs sm:text-sm md:text-base text-blue-400">
+                        ៛{" "}
+                        {item.product.price
+                          ? (item.product.price * 4100).toLocaleString("km-KH", {
+                              maximumFractionDigits: 0,
+                            })
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {/* Modern Order Summary UI for all items */}
+              <div className="bg-white rounded-lg shadow p-2 sm:p-3 md:p-4 mt-2 border-t">
+                <div className="flex items-center gap-1 sm:gap-2 md:gap-3 mb-3">
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-purple-500"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M3 7h18M3 12h18M3 17h18" />
+                  </svg>
+                  <span className="font-bold text-sm sm:text-base md:text-lg text-purple-700">
+                    Order Summary
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 sm:gap-2 md:gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500 text-xs sm:text-sm md:text-base">Subtotal</span>
+                    <span className="font-semibold text-gray-700 text-xs sm:text-sm md:text-base">
+                      $
+                      {orderItems
+                        .reduce((sum, item) => sum + (item.product.price || 0) * item.qty, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500 text-xs sm:text-sm md:text-base">Discount</span>
+                    <span className="font-semibold text-green-600 text-xs sm:text-sm md:text-base">$0.00</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500 text-xs sm:text-sm md:text-base">Tax (10%)</span>
+                    <span className="font-semibold text-gray-700 text-xs sm:text-sm md:text-base">
+                      $
+                      {(orderItems.reduce((sum, item) => sum + (item.product.price || 0) * item.qty, 0) * 0.1).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-2 border-t pt-2">
+                <span className="font-semibold text-gray-700 text-xs sm:text-sm md:text-base">Total</span>
+                <span className="font-bold text-purple-700 text-base sm:text-lg md:text-xl">
+                  $
+                  {(orderItems.reduce((sum, item) => sum + (item.product.price || 0) * item.qty, 0) * 1.1).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-400 text-center py-10 text-xs sm:text-sm md:text-base">
+              Select products to see details.
+            </div>
+          )}
+        </div>
       </div>
+      {/* </div> */}
       {error && (
         <div className="mt-8 text-center text-red-500 font-semibold text-lg">
           {error}
