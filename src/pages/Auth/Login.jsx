@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center backdrop-blur-md overflow-hidden">
+    <div className=" inset-0 flex items-center justify-center  backdrop-blur-md overflow-hidden">
       {/* Background Effects */}
       <div
         className="blob one absolute animate-pulse top-0 left-0 w-80 h-80 bg-purple-300 rounded-full opacity-30 blur-2xl animate-blob1"
@@ -79,7 +79,7 @@ const Login = () => {
         aria-hidden="true"
       ></div>
 
-      <main className="wrap relative z-10 w-full max-w-md mx-auto">
+      <main className="wrap relative z-10 w-full max-w-md mx-auto flex items-center justify-center min-h-[80vh]">
         <form
           className="card"
           id="login-form"
