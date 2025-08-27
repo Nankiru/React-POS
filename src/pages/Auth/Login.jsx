@@ -12,6 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const emailRef = useRef();
   const passwordRef = useRef();
   const demoAuth = (provider) => {
@@ -48,10 +49,13 @@ const Login = () => {
       .then((data) => {
         if (data.message === 'successful') {
           localStorage.setItem("auth", "true");
+          localStorage.setItem("userInfo", JSON.stringify({ name: data.name, role: data.role }));
           setSuccess(true);
-          navigate("/");
+          // navigate("/");
+          window.location.href = "/";
         } else {
-          setError(data.message || "Invalid email or password");
+          // setError(data.message || "Invalid email or password");
+          alert(data.message || "Invalid email or password");
         }
       })
       .catch(() => {
@@ -97,7 +101,7 @@ const Login = () => {
             >
               {/* <div className="logo w-12 h-12 bg-purple-500 rounded-full"></div> */}
               <div className="text-center w-full">
-                <div className="title text-2xl font-bold text-purple-700">
+                <div className="title text-2xl font-bold text-purple-500">
                   Welcome back
                 </div>
                 <div className="subtitle text-white">Sign in to continue</div>
@@ -207,8 +211,10 @@ const Login = () => {
               type="submit"
               disabled={!userEmail || !userPassword}
               style={{
-                cursor: !userEmail || !userPassword ? "not-allowed" : "pointer",
+                cursor: !userEmail || !userPassword ? "not-allowed" : "pointer ",
                 opacity: !userEmail || !userPassword ? 0.6 : 1,
+                
+                
               }}
             >
               Sign in
@@ -238,7 +244,7 @@ const Login = () => {
               </button>
             </div>
 
-            <div
+            {/* <div
               id="error"
               role="alert"
               aria-live="polite"
@@ -250,21 +256,32 @@ const Login = () => {
               }}
             >
               {error}
-            </div>
+            </div> */}
 
-            <div className=" text-center mt-2">
+            <div className="text-center mt-2">
               No account?{" "}
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Demo only 🙂");
-                }}
-                className=" text-white"
+              <button
+                type="button"
+                className="text-white cursor-pointer hover:text-[#24E1C1] hover:transition-all hover:underline hover:duration-300 px-2 py-1 rounded focus:outline-none"
+                onClick={() => setShowModal(true)}
               >
                 Create one
-              </a>
+              </button>
             </div>
+            {showModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-white/30 bg-opacity-40">
+                <div className="bg-white rounded-lg shadow-lg p-6 text-center max-w-xs">
+                  <div className="text-lg font-semibold mb-2 text-purple-700">Access Denied</div>
+                  <div className="mb-4 text-gray-700">You need to access by Admin😘</div>
+                  <button
+                    className="cursor-pointer bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
+                    onClick={() => setShowModal(false)}
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </main>

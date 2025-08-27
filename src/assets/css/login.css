@@ -6,7 +6,7 @@
       --bg-2:#101a2b;           /* ink blue */
       --glass:#ffffff10;        /* glass layer */
       --text:#e6e7ee;           
-      --muted:#a7adcc;          
+      --muted:#ffffff;          
       --accent-1:#7B61FF;       /* periwinkle electric */
       --accent-2:#24E1C1;       /* mint-teal neon */
       --accent-3:#FF6AD5;       /* hyper pink */
@@ -65,8 +65,8 @@
     /* Remember + link row */
     .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 6px 2px 14px}
     .checkbox{accent-color: var(--accent-2)}
-    a{color:var(--accent-2); text-decoration:none}
-    a:hover{text-decoration:underline}
+    /* a{color:var(--accent-2); text-decoration:none}
+    a:hover{text-decoration:underline} */
 
     /* Primary button */
     .btn{width:100%; padding:14px 16px; border:0; border-radius:16px; font-weight:700; letter-spacing:.3px; color:#081013; background: linear-gradient(135deg, var(--accent-4), var(--accent-2)); cursor:pointer; box-shadow: 0 12px 30px #24e1c14a, 0 2px 0 #ffffff40 inset; transition: transform .14s ease, box-shadow .2s ease, filter .2s ease; position:relative; overflow:hidden}
@@ -86,7 +86,7 @@
 
     /* Footer */
     .foot{margin-top:16px; text-align:center; color:#cfd4ffb5; font-size:.92rem}
-    .foot a{color: var(--accent-3)}
+    /* .foot a{color: var(--accent-3)} */
 
     /* Safety: reduced motion */
     @media (prefers-reduced-motion: reduce){
